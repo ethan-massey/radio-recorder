@@ -130,4 +130,4 @@ dist
 .pnp.*
 
 .DS_Store
-examples-recordings/
+example-recordings/

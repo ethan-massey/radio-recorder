@@ -1,10 +1,10 @@
 // Imports modules.
-const fs = require('fs'),
-  path = require('path');
-const AudioRecorder = require('node-audiorecorder');
+const fs = require('fs'), path = require('path')
+const AudioRecorder = require('node-audiorecorder')
+const { getFormattedCurrentDate } = require('./dateFormat')
 
 // Constants.
-const DIRECTORY = 'examples-recordings';
+const DIRECTORY = 'example-recordings';
 
 // Create path to write recordings to.
 if (!fs.existsSync(DIRECTORY)) {
@@ -26,14 +26,8 @@ audioRecorder.on('end', function () {
   console.warn('Recording ended.');
 });
 
-// Create file path with random name.
-const fileName = path.join(
-  DIRECTORY,
-  Math.random()
-    .toString(36)
-    .replace(/[^0-9a-zA-Z]+/g, '')
-    .concat('.wav')
-);
+// Create file path
+const fileName = [DIRECTORY,'/',getFormattedCurrentDate(),'.wav'].join('')
 console.log('Writing new recording file at:', fileName);
 
 // Create write stream.
