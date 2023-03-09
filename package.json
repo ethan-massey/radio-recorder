@@ -12,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cron": "^2.2.0",
     "node-audiorecorder": "^3.0.0"
   }
 }
