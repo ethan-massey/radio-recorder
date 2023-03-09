@@ -18,6 +18,7 @@ const sendRecordingToS3 = async (audioFile) => {
   });
 
   try {
+    console.info('Sending file to s3...')
     const response = await client.send(command);
     console.log(response);
   } catch (err) {
