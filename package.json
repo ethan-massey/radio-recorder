@@ -12,6 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.287.0",
+    "dotenv": "^16.0.3",
     "node-audiorecorder": "^3.0.0"
   }
 }
