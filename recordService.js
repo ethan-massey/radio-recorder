@@ -45,7 +45,7 @@ const createRecording = async () => {
   console.warn('Press ctrl+c to exit.');
 
   // Keep alive for 3 hours
-  await setTimeout(1000 * 5)
+  await setTimeout(1000 * 10)
   audioRecorder.stop()
   // return filename and file as buffer for s3
   return {
