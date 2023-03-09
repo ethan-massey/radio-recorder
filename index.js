@@ -14,7 +14,7 @@ if (!fs.existsSync(DIRECTORY)) {
 // Initialize recorder and file stream.
 const audioRecorder = new AudioRecorder({
   program: 'sox',
-  rate: 44100,
+  rate: 44100, // 44.1kHz CD sample rate standard
   silence: 0
 }, console);
 
@@ -39,3 +39,8 @@ audioRecorder.start().stream().pipe(fileStream);
 // Keep process alive.
 process.stdin.resume();
 console.warn('Press ctrl+c to exit.');
+
+// Keep alive for 3 hours
+setTimeout(() => {
+  process.exit()
+}, 1000 * 60 * 60 * 3)
