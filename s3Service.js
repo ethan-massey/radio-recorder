@@ -10,11 +10,11 @@ const client = new S3Client(
     }
 );
 
-const sendRecordingToS3 = async (response) => {
+const sendRecordingToS3 = async (audioFile) => {
   const command = new PutObjectCommand({
     Bucket: "daily-elliot-audio",
-    Key: response.filename,
-    Body: response.buffer
+    Key: audioFile.filename,
+    Body: audioFile.buffer
   });
 
   try {
