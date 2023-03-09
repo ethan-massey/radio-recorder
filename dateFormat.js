@@ -19,8 +19,6 @@ function getFormattedCurrentDate() {
     return [metrics.year, metrics.month, metrics.day].join('-') + 'T' + [metrics.hour, metrics.minute, metrics.second].join('-')
 }
 
-console.log(getFormattedCurrentDate())
-
 module.exports = {
     getFormattedCurrentDate
 }
