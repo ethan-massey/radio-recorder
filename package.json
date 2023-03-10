@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
+    "start-cron": "/home/pi/.config/nvm/versions/node/v19.6.1/bin/node index",
     "test": "echo \"Error: no test specified\" && exit 1",
     "cleanup": "rm -r example-recordings log"
   },

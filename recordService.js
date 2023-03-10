@@ -50,7 +50,7 @@ const createRecording = async () => {
     });
   }
 
-  await sleep(5000);
+  await sleep(1000 * 3);
   audioRecorder.stop()
   
   // return filename and file as buffer for s3
