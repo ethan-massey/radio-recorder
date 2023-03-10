@@ -2,6 +2,7 @@
 const fs = require('fs'), path = require('path')
 const AudioRecorder = require('node-audiorecorder')
 const { getFormattedCurrentDate } = require('./dateFormat')
+const { setTimeout } = require("timers/promises")
 
 // function to create audio recording and save audio file to output dir
 const createRecording = async () => {
@@ -44,13 +45,8 @@ const createRecording = async () => {
   console.warn('Press ctrl+c to exit.');
 
   // Keep alive for 3 hours
-  const sleep = (time) => {
-    return new Promise((resolve) => {
-      setTimeout(resolve, time);
-    });
-  }
+  await setTimeout(1000 * 10)
 
-  await sleep(1000 * 3);
   audioRecorder.stop()
   
   // return filename and file as buffer for s3
