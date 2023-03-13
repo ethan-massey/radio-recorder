@@ -23,4 +23,4 @@
 # m h  dom mon dow   command
 
 XDG_RUNTIME_DIR="/run/user/1000"
-0 6 * * 1-5 /home/pi/Desktop/radio-recorder/cronjob.sh
+45 5 * * 1-5 /home/pi/Desktop/radio-recorder/cronjob.sh
