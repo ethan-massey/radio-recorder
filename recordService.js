@@ -42,7 +42,7 @@ const createRecording = async () => {
   // Keep process alive.
   // process.stdin.resume(); I don't know what this is or why it was included
 
-  console.warn('Press ctrl+c to exit.');
+  console.log('Press ctrl+c to exit.');
 
   // Keep alive for 3 hours
   await setTimeout(1000 * 10)
