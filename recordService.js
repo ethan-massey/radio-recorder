@@ -44,8 +44,8 @@ const createRecording = async () => {
 
   console.log('Press ctrl+c to exit.');
 
-  // Keep alive for 3 hours
-  await setTimeout(1000 * 10)
+  // Keep alive 5:45am to 10:30am
+  await setTimeout(1000 * 60 * 60 * 4.75)
 
   audioRecorder.stop()
   
