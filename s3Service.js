@@ -112,33 +112,26 @@ const uploadFileToS3 = async (fileName) => {
       // console.log(`${chunkNo} data: `, chunk, chunk.length);
       // console.log(`Received ${chunk.length} bytes of data. (chunk no ${chunkNo})`);
   
-      const upload = () => {
-        return new Promise((resolve, reject) => {
-          readStream.pause()
-          uploadChunk(fileName, chunk, chunkNo, UploadId).then((eTag) => {
-            parts.push({
-              ETag: eTag,
-              PartNumber: chunkNo
-            })
-            console.log(`uploaded ${chunk.length} bytes of data. (Chunk no ${chunkNo})`)
-            chunkNo += 1
-          }).then(() => {
-            readStream.resume()
-            resolve()
-          })
+      readStream.pause()
+      uploadChunk(fileName, chunk, chunkNo, UploadId).then((eTag) => {
+        parts.push({
+          ETag: eTag,
+          PartNumber: chunkNo
         })
-      }
-  
-      // all chunks other than final one
-      if (chunkNo < numChunks){
-        upload()
-      } else if (chunkNo === numChunks) {
-        upload().then(async () => {
+        console.log(`uploaded ${chunk.length} bytes of data. (Chunk No. ${chunkNo})`)
+      }).then(async () => {
+        // if on last chunk
+        if (chunkNo === numChunks) {
           res = await finishMultiPartUpload(fileName, UploadId, parts)
           console.log('Success uploading file to S3')
+          console.log(parts)
           console.log(res)
-        })
-      }
+        // if on any other chunk
+        } else {
+          chunkNo += 1
+          readStream.resume()
+        }
+      })
     });
   
     readStream.on('error', (err) => {
