@@ -93,72 +93,49 @@ const uploadFileToS3 = async (fileName) => {
   var chunkNo = 1
 
   readStream.on('data', (chunk) => {
-    // data.push(chunk);
     // console.log(`${chunkNo} data: `, chunk, chunk.length);
     // console.log(`Received ${chunk.length} bytes of data. (chunk no ${chunkNo})`);
 
-    if (chunkNo < numChunks - 1){
-      readStream.pause()
-      uploadChunk(fileName, chunk, chunkNo, UploadId).then((eTag) => {
-        parts.push({
-          ETag: eTag,
-          PartNumber: chunkNo
+    const upload = () => {
+      return new Promise((resolve, reject) => {
+        readStream.pause()
+        uploadChunk(fileName, chunk, chunkNo, UploadId).then((eTag) => {
+          parts.push({
+            ETag: eTag,
+            PartNumber: chunkNo
+          })
+          console.log(`uploaded ${chunk.length} bytes of data. (Chunk no ${chunkNo})`)
+          chunkNo += 1
+        }).then(() => {
+          readStream.resume()
+          resolve()
         })
-        console.log(`uploaded ${chunk.length} bytes of data. (Chunk no ${chunkNo})`)
-        chunkNo += 1
-      }).then(() => {
-        readStream.resume()
       })
+    }
+
+    // all chunks other than last two
+    if (chunkNo < numChunks - 1){
+      upload()
+    // penultimate chunk
     } else if (chunkNo === numChunks - 1){
-      // don't do anything
-      console.log('skipping 2nd to last')
+      console.log('skipping 2nd to last (combine with last)')
       chunkNo += 1
       latest = chunk
+    // final chunk
     } else if (chunkNo === numChunks) {
       chunk = Buffer.concat([latest, chunk])
-      readStream.pause()
-      uploadChunk(fileName, chunk, chunkNo, UploadId).then((eTag) => {
-        parts.push({
-          ETag: eTag,
-          PartNumber: chunkNo
-        })
-        console.log(`uploaded ${chunk.length} bytes of data. (Chunk no ${chunkNo})`)
-        chunkNo += 1
-      }).then(async () => {
+      upload().then(async () => {
         res = await finishMultiPartUpload(fileName, UploadId, parts)
         console.log('Success uploading file to S3')
         console.log(res)
       })
     }
-
-
   });
-
-
-  // readStream.on('end', async () => {
-  //     // console.log('end :', Buffer.concat(data).toString());
-  //     uploadChunk(fileName, latest, chunkNo, UploadId).then((eTag) => {
-  //       parts.push({
-  //         ETag: eTag,
-  //         PartNumber: chunkNo
-  //       })
-  //       chunkNo += 1
-  //     }).then(() => {
-  //       console.log(parts)
-  //     }).then(async () => {
-  //       res = await finishMultiPartUpload(fileName, UploadId, parts)
-  //       console.log('Success uploading file to S3')
-  //       console.log(res)
-  //     })
-  // })
 
   readStream.on('error', (err) => {
       console.log('error :', err)
   })
 }
-
-
-uploadFileToS3('test.wav')
 
 module.exports = {
     uploadFileToS3
