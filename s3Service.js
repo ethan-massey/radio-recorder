@@ -75,7 +75,7 @@ const abortUpload = async (Bucket, fileName, UploadId) => {
   return response
 }
 
-// public function
+// public function to upload a file to S3
 const uploadFileToS3 = async (fileName) => {
   const UploadId = await startMultipartUpload(fileName)
   const fileSizeInBytes = fs.statSync(`./example-recordings/${fileName}`).size
@@ -84,14 +84,18 @@ const uploadFileToS3 = async (fileName) => {
   if (fileSizeInBytes % chunkSize !== 0){
     numChunks += 1
   }
-  console.log(`num chunks is ${numChunks}`)
+  console.log(`Expecting ${numChunks} chunks from local file stream: ${fileName}`)
 
   const readStream = fs.createReadStream(`./example-recordings/${fileName}`, {highWaterMark: chunkSize})
+  // for storing ETag and part numbers to send to AWS in CompleteMultipartUploadCommand
   const parts = []
-  let latest
-
+  // for storing penultimate buffer
+  // (combine with final to comply with AWS minimum upload size)
+  let penultimateBuffer
+  // ID for current chunk being processed
   var chunkNo = 1
 
+  // listen to "data" event for incoming chunks
   readStream.on('data', (chunk) => {
     // console.log(`${chunkNo} data: `, chunk, chunk.length);
     // console.log(`Received ${chunk.length} bytes of data. (chunk no ${chunkNo})`);
@@ -118,12 +122,12 @@ const uploadFileToS3 = async (fileName) => {
       upload()
     // penultimate chunk
     } else if (chunkNo === numChunks - 1){
-      console.log('skipping 2nd to last (combine with last)')
+      console.log(`Ignoring chunk ${chunkNo} (combine with last)`)
       chunkNo += 1
-      latest = chunk
+      penultimateBuffer = chunk
     // final chunk
     } else if (chunkNo === numChunks) {
-      chunk = Buffer.concat([latest, chunk])
+      chunk = Buffer.concat([penultimateBuffer, chunk])
       upload().then(async () => {
         res = await finishMultiPartUpload(fileName, UploadId, parts)
         console.log('Success uploading file to S3')
