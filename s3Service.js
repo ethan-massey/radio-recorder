@@ -3,7 +3,8 @@ const {
   CreateMultipartUploadCommand, 
   CompleteMultipartUploadCommand, 
   AbortMultipartUploadCommand,
-  UploadPartCommand } = require("@aws-sdk/client-s3")
+  UploadPartCommand,
+  PutObjectCommand } = require("@aws-sdk/client-s3")
 require('dotenv').config()
 const fs = require('fs');
 
@@ -17,6 +18,25 @@ const client = new S3Client(
         }
     }
 );
+
+// Used for recordings less than 5MB
+// (Multipart Upload doesn't allow chunks < 5MB)
+const sendWholeFileToS3 = async (audioFile) => {
+  const command = new PutObjectCommand({
+    Bucket: S3_BUCKET,
+    Key: audioFile,
+    Body: fs.readFileSync(`example-recordings/${audioFile}`)
+  });
+
+  try {
+    console.info('Sending file to s3...')
+    const response = await client.send(command);
+    console.log(response);
+  } catch (err) {
+    console.error('Error sending file to s3')
+    console.error(err);
+  }
+};
 
 // Initiate multi-part upload and return UploadId
 const startMultipartUpload = async (fileName) => {
@@ -65,16 +85,6 @@ const finishMultiPartUpload = async (fileName, UploadId, Parts) => {
   return response
 }
 
-const abortUpload = async (Bucket, fileName, UploadId) => {
-  const command = new AbortMultipartUploadCommand({
-    Bucket: Bucket,
-    Key: fileName,
-    UploadId: UploadId
-  });
-  const response = await client.send(command);
-  return response
-}
-
 // public function to upload a file to S3
 const uploadFileToS3 = async (fileName) => {
   const UploadId = await startMultipartUpload(fileName)
@@ -84,62 +94,61 @@ const uploadFileToS3 = async (fileName) => {
   if (fileSizeInBytes % chunkSize !== 0){
     numChunks += 1
   }
-  console.log(`Expecting ${numChunks} chunks from local file stream: ${fileName}`)
 
-  const readStream = fs.createReadStream(`./example-recordings/${fileName}`, {highWaterMark: chunkSize})
-  // for storing ETag and part numbers to send to AWS in CompleteMultipartUploadCommand
-  const parts = []
-  // for storing penultimate buffer
-  // (combine with final to comply with AWS minimum upload size)
-  let penultimateBuffer
-  // ID for current chunk being processed
-  var chunkNo = 1
+  // Use single-command S3 upload (file is smaller than 5MB)
+  if (numChunks === 1) {
+    sendWholeFileToS3(fileName)
+  // Use multi-part upload
+  } else {
+    console.log(`Expecting ${numChunks} chunks from local file stream: ${fileName}`)
 
-  // listen to "data" event for incoming chunks
-  readStream.on('data', (chunk) => {
-    // console.log(`${chunkNo} data: `, chunk, chunk.length);
-    // console.log(`Received ${chunk.length} bytes of data. (chunk no ${chunkNo})`);
-
-    const upload = () => {
-      return new Promise((resolve, reject) => {
-        readStream.pause()
-        uploadChunk(fileName, chunk, chunkNo, UploadId).then((eTag) => {
-          parts.push({
-            ETag: eTag,
-            PartNumber: chunkNo
+    const readStream = fs.createReadStream(`./example-recordings/${fileName}`, {highWaterMark: chunkSize})
+    // for storing ETag and part numbers to send to AWS in CompleteMultipartUploadCommand
+    const parts = []
+    // ID for current chunk being processed
+    var chunkNo = 1
+  
+    // listen to "data" event for incoming chunks
+    readStream.on('data', (chunk) => {
+      // console.log(`${chunkNo} data: `, chunk, chunk.length);
+      // console.log(`Received ${chunk.length} bytes of data. (chunk no ${chunkNo})`);
+  
+      const upload = () => {
+        return new Promise((resolve, reject) => {
+          readStream.pause()
+          uploadChunk(fileName, chunk, chunkNo, UploadId).then((eTag) => {
+            parts.push({
+              ETag: eTag,
+              PartNumber: chunkNo
+            })
+            console.log(`uploaded ${chunk.length} bytes of data. (Chunk no ${chunkNo})`)
+            chunkNo += 1
+          }).then(() => {
+            readStream.resume()
+            resolve()
           })
-          console.log(`uploaded ${chunk.length} bytes of data. (Chunk no ${chunkNo})`)
-          chunkNo += 1
-        }).then(() => {
-          readStream.resume()
-          resolve()
         })
-      })
-    }
-
-    // all chunks other than last two
-    if (chunkNo < numChunks - 1){
-      upload()
-    // penultimate chunk
-    } else if (chunkNo === numChunks - 1){
-      console.log(`Ignoring chunk ${chunkNo} (combine with last)`)
-      chunkNo += 1
-      penultimateBuffer = chunk
-    // final chunk
-    } else if (chunkNo === numChunks) {
-      chunk = Buffer.concat([penultimateBuffer, chunk])
-      upload().then(async () => {
-        res = await finishMultiPartUpload(fileName, UploadId, parts)
-        console.log('Success uploading file to S3')
-        console.log(res)
-      })
-    }
-  });
-
-  readStream.on('error', (err) => {
-      console.log('error :', err)
-  })
+      }
+  
+      // all chunks other than final one
+      if (chunkNo < numChunks){
+        upload()
+      } else if (chunkNo === numChunks) {
+        upload().then(async () => {
+          res = await finishMultiPartUpload(fileName, UploadId, parts)
+          console.log('Success uploading file to S3')
+          console.log(res)
+        })
+      }
+    });
+  
+    readStream.on('error', (err) => {
+        console.log('error :', err)
+    })
+  }
 }
+
+uploadFileToS3('test.wav')
 
 module.exports = {
     uploadFileToS3
