@@ -2,7 +2,6 @@ const {
   S3Client, 
   CreateMultipartUploadCommand, 
   CompleteMultipartUploadCommand, 
-  AbortMultipartUploadCommand,
   UploadPartCommand,
   PutObjectCommand } = require("@aws-sdk/client-s3")
 require('dotenv').config()
