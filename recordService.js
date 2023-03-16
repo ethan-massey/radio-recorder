@@ -49,11 +49,8 @@ const createRecording = async () => {
 
   audioRecorder.stop()
   
-  // return filename and file as buffer for s3
-  return {
-    filename: fileName.replace(DIRECTORY + '/', ''),
-    buffer: fs.readFileSync(fileName)
-  }
+  // return filename of recording
+  return fileName.replace(DIRECTORY + '/', '')
 }
 
 module.exports = {
