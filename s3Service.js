@@ -148,8 +148,6 @@ const uploadFileToS3 = async (fileName) => {
   }
 }
 
-uploadFileToS3('test.wav')
-
 module.exports = {
     uploadFileToS3
 }
