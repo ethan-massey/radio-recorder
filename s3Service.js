@@ -29,7 +29,6 @@ const startMultipartUpload = async (fileName) => {
     const response = await client.send(command);
     return response.UploadId
   } catch (err) {
-    console.error(err)
     throw err
   }
 }
@@ -48,7 +47,6 @@ const uploadChunk = async (fileName, chunk, chunkNumber, UploadId) => {
     return response.ETag
   } catch (err) {
     console.error(`Failed to upload chunk ${chunkNumber} to S3`)
-    console.error(err)
     throw err
   }
 }
@@ -107,6 +105,7 @@ const uploadFileToS3 = async (fileName) => {
       console.log(parts)
       res = await finishMultiPartUpload(fileName, UploadId, parts)
       console.log('Success uploading file to S3')
+      console.log(res)
   })
 
   readStream.on('error', (err) => {
@@ -115,7 +114,7 @@ const uploadFileToS3 = async (fileName) => {
 }
 
 
-uploadFileToS3('test.wav')
+// uploadFileToS3('test.wav')
 
 module.exports = {
     uploadFileToS3
