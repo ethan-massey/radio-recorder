@@ -88,7 +88,6 @@ const finishMultiPartUpload = async (fileName, UploadId, Parts) => {
 
 // public function to upload a file to S3
 const uploadFileToS3 = async (fileName) => {
-  const UploadId = await startMultipartUpload(fileName)
   const fileSizeInBytes = fs.statSync(`./example-recordings/${fileName}`).size
   const chunkSize = 5242880
   var numChunks = Math.floor(fileSizeInBytes / chunkSize)
@@ -101,6 +100,7 @@ const uploadFileToS3 = async (fileName) => {
     sendWholeFileToS3(fileName)
   // Use multi-part upload
   } else {
+    const UploadId = await startMultipartUpload(fileName)
     console.log(`Expecting ${numChunks} chunks from local file stream: ${fileName}`)
 
     const readStream = fs.createReadStream(`./example-recordings/${fileName}`, {highWaterMark: chunkSize})
