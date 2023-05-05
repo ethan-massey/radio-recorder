@@ -126,7 +126,6 @@ const uploadFileToS3 = async (fileName) => {
         if (chunkNo === numChunks) {
           res = await finishMultiPartUpload(fileName, UploadId, parts)
           console.log('Success uploading file to S3')
-          console.log(parts)
           console.log(res)
         // if on any other chunk
         } else {
