@@ -23,4 +23,9 @@
 # m h  dom mon dow   command
 
 XDG_RUNTIME_DIR="/run/user/1000"
+# open chromium on iheart radio stream of DC101 radio at 5:40am
+40 5 * * 1-5 export DISPLAY=:0 && chromium-browser https://n14b-e2.revma.ihrhls.com/zc2525
+# start recorder at 5:45am, record, and send to S3
 45 5 * * 1-5 /home/pi/Desktop/radio-recorder/cronjob.sh
+# close chromium gracefully 11am (using -o flag)
+0 11 * * 1-5 pkill -o chromium
