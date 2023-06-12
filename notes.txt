@@ -1,1 +1,4 @@
 https://www.npmjs.com/package/node-audiorecorder
+
+iHeart radio stream: http://stream.revma.ihrhls.com/zc2525
+How to get network stream from iHeart: https://stackoverflow.com/questions/42043962/how-can-i-get-the-raw-stream-url-of-an-iheartradio-station
