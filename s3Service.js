@@ -82,8 +82,13 @@ const finishMultiPartUpload = async (fileName, UploadId, Parts) => {
       Parts: Parts
     }
   });
-  const response = await client.send(command);
-  return response
+  try {
+    const response = await client.send(command);
+    return response
+  } catch (err) {
+    console.error(`Failed to finish multi-part upload.`)
+    throw err
+  }
 }
 
 // public function to upload a file to S3
