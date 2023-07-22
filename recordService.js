@@ -7,7 +7,7 @@ const { setTimeout } = require("timers/promises")
 // function to create audio recording and save audio file to output dir
 const createRecording = async () => {
   // Constants.
-  const DIRECTORY = 'example-recordings';
+  const DIRECTORY = 'recordings';
 
   // Create path to write recordings to.
   if (!fs.existsSync(DIRECTORY)) {

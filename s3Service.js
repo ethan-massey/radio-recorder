@@ -24,13 +24,14 @@ const sendWholeFileToS3 = async (audioFile) => {
   const command = new PutObjectCommand({
     Bucket: S3_BUCKET,
     Key: audioFile,
-    Body: fs.readFileSync(`example-recordings/${audioFile}`),
+    Body: fs.readFileSync(`recordings/${audioFile}`),
     ContentType: 'audio/wav'
   });
 
   try {
     console.info('Sending file to s3...')
     const response = await client.send(command);
+    console.log('Success uploading file to S3')
     console.log(response);
   } catch (err) {
     console.error('Error sending file to s3')
@@ -91,9 +92,17 @@ const finishMultiPartUpload = async (fileName, UploadId, Parts) => {
   }
 }
 
+// delete file from recordings dir
+const deleteFile = (fileName) => {
+  fs.unlink(`./recordings/${fileName}`, (err) => {
+    if (err) console.log(err);
+  })
+  console.log(`${fileName} deleted from local storage`);
+}
+
 // public function to upload a file to S3
 const uploadFileToS3 = async (fileName) => {
-  const fileSizeInBytes = fs.statSync(`./example-recordings/${fileName}`).size
+  const fileSizeInBytes = fs.statSync(`./recordings/${fileName}`).size
   const chunkSize = 5242880
   var numChunks = Math.floor(fileSizeInBytes / chunkSize)
   if (fileSizeInBytes % chunkSize !== 0){
@@ -102,13 +111,14 @@ const uploadFileToS3 = async (fileName) => {
 
   // Use single-command S3 upload (file is smaller than 5MB)
   if (numChunks === 1) {
-    sendWholeFileToS3(fileName)
+    await sendWholeFileToS3(fileName)
+    deleteFile(fileName)
   // Use multi-part upload
   } else {
     const UploadId = await startMultipartUpload(fileName)
     console.log(`Expecting ${numChunks} chunks from local file stream: ${fileName}`)
 
-    const readStream = fs.createReadStream(`./example-recordings/${fileName}`, {highWaterMark: chunkSize})
+    const readStream = fs.createReadStream(`./recordings/${fileName}`, {highWaterMark: chunkSize})
     // for storing ETag and part numbers to send to AWS in CompleteMultipartUploadCommand
     const parts = []
     // ID for current chunk being processed
@@ -132,6 +142,7 @@ const uploadFileToS3 = async (fileName) => {
           res = await finishMultiPartUpload(fileName, UploadId, parts)
           console.log('Success uploading file to S3')
           console.log(res)
+          deleteFile(fileName)
         // if on any other chunk
         } else {
           chunkNo += 1
