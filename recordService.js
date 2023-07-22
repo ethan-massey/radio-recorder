@@ -7,7 +7,7 @@ const { setTimeout } = require("timers/promises")
 // function to create audio recording and save audio file to output dir
 const createRecording = async () => {
   // Constants.
-  const DIRECTORY = 'example-recordings';
+  const DIRECTORY = 'recordings';
 
   // Create path to write recordings to.
   if (!fs.existsSync(DIRECTORY)) {
@@ -45,7 +45,7 @@ const createRecording = async () => {
   console.log('Press ctrl+c to exit.');
 
   // Keep alive 5:45am to 10:30am
-  await setTimeout(1000 * 60 * 60 * 4.75)
+  await setTimeout(1000 * 5)//60 * 60 * 4.75)
 
   audioRecorder.stop()
   
