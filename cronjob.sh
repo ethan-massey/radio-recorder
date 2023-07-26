@@ -1,3 +1,3 @@
 #!/bin/sh
-cd /home/pi/Desktop/radio-recorder
+cd /home/ethan/Desktop/radio-recorder
 npm run start-cron >> log
