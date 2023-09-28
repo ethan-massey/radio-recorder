@@ -18,7 +18,8 @@ const createRecording = async () => {
   const audioRecorder = new AudioRecorder({
     program: 'sox',
     rate: 44100, // 44.1kHz CD sample rate standard
-    silence: 0
+    silence: 0,
+    type: `mp3`, // Format type.
   }, console);
 
   // Log information on the following events.
@@ -30,7 +31,7 @@ const createRecording = async () => {
   });
 
   // Create file path
-  const fileName = [DIRECTORY,'/',getFormattedCurrentDate(),'.wav'].join('')
+  const fileName = [DIRECTORY,'/',getFormattedCurrentDate(),'.mp3'].join('')
   console.log('Writing new recording file at:', fileName);
 
   // Create write stream.

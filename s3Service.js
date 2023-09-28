@@ -25,7 +25,7 @@ const sendWholeFileToS3 = async (audioFile) => {
     Bucket: S3_BUCKET,
     Key: audioFile,
     Body: fs.readFileSync(`recordings/${audioFile}`),
-    ContentType: 'audio/wav'
+    ContentType: 'audio/mpeg'
   });
 
   try {
@@ -44,7 +44,7 @@ const startMultipartUpload = async (fileName) => {
   const command = new CreateMultipartUploadCommand({
     Bucket: S3_BUCKET,
     Key: fileName,
-    ContentType: 'audio/wav'
+    ContentType: 'audio/mpeg'
   });
 
   try{
