@@ -24,8 +24,8 @@
 
 XDG_RUNTIME_DIR="/run/user/1000"
 # start ffmpeg recording
-35 11 * * 1-5 ffmpeg -i http://stream.revma.ihrhls.com/zc2525 -c copy /home/ethan/Desktop/radio-recorder/recordings/$(date +%Y-%m-%dT%H-%M-%S).aac
+#12 16 * * 1-5 ffmpeg -i http://stream.revma.ihrhls.com/zc2525 -t 00:02:00 /home/ethan/Desktop/radio-recorder/recordings/$(date +%Y-%m-%dT%H-%M-%S).mp3
 # stop ffmpeg recording
-36 11 * * 1-5 killall ffmpeg
+#54 12 * * 1-5 killall ffmpeg
 # send recording to s3
-37 11 * * 1-5 /home/ethan/Desktop/radio-recorder/cronjob.sh
+#55 12 * * 1-5 /home/ethan/Desktop/radio-recorder/cronjob.sh
