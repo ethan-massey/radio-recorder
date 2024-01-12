@@ -23,8 +23,9 @@
 # m h  dom mon dow   command
 
 XDG_RUNTIME_DIR="/run/user/1000"
-# open VLC on iheart radio stream of DC101 radio at 5:40am
-40 5 * * 1-5 export DISPLAY=:0 && vlc http://stream.revma.ihrhls.com/zc2525
-# start recorder at 5:45am, record, and send to S3
-45 5 * * 1-5 /home/pi/Desktop/radio-recorder/cronjob.sh
-0 12 * * 1-5 killall vlc
+# start ffmpeg recording
+35 11 * * 1-5 ffmpeg -i http://stream.revma.ihrhls.com/zc2525 -c copy /home/ethan/Desktop/radio-recorder/recordings/$(date +%Y-%m-%dT%H-%M-%S).aac
+# stop ffmpeg recording
+36 11 * * 1-5 killall ffmpeg
+# send recording to s3
+37 11 * * 1-5 /home/ethan/Desktop/radio-recorder/cronjob.sh
